@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site_settings.site_name }} - {% block title %}{% endblock %}</title>
+    <meta name="description" content="{{ site_settings.meta_description }}">
+    <meta name="keywords" content="{{ site_settings.keywords }}">
+    
+    <!-- Favicon -->
+    {% if site_settings.favicon %}
+        <link rel="icon" type="image/png" href="{{ site_settings.favicon.url }}">
+    {% endif %}
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    {% include "layouts/header.html" %}
+    
+    <!-- Alert Messages -->
+    {% if messages %}
+        {% include "components/alerts.html" %}
+    {% endif %}
+    
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+    
+    {% include "layouts/footer.html" %}
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    {% if site_settings.google_analytics_id %}
+        <!-- Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ site_settings.google_analytics_id }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '{{ site_settings.google_analytics_id }}');
+        </script>
+    {% endif %}
+    <script>
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength += 1;
+            if (password.match(/[a-z]+/)) strength += 1;
+            if (password.match(/[A-Z]+/)) strength += 1;
+            if (password.match(/[0-9]+/)) strength += 1;
+            if (password.match(/[!@#$%^&*(),.?":{}|<>]+/)) strength += 1;
+            return strength;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.querySelector('input[type="password"]');
+            if (passwordInput) {
+                const meter = document.createElement('div');
+                meter.className = 'h-2 mt-2 rounded-full bg-gray-200';
+                passwordInput.parentNode.insertBefore(meter, passwordInput.nextSibling);
+        
+                passwordInput.addEventListener('input', function() {
+                    const strength = checkPasswordStrength(this.value);
+                    const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+                    meter.innerHTML = `<div class="h-full rounded-full ${colors[strength-1]}" style="width: ${strength*20}%"></div>`;
+                });
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

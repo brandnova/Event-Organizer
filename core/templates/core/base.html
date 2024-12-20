@@ -1,0 +1,13 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col">
+    {% include "layouts/header.html" %}
+    
+    <main class="flex-grow">
+        {% block account_content %}{% endblock %}
+    </main>
+    
+    {% include "layouts/footer.html" %}
+</div>
+{% endblock %}
