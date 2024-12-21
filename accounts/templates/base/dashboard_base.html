@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_settings.site_name }}{% endblock %}</title>
+    
+    <!-- Tailwind and Alpine.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body 
+    x-data="{ 
+        sidebarOpen: window.innerWidth >= 768,
+        isMobile: window.innerWidth < 768,
+        init() {
+            window.addEventListener('resize', () => {
+                this.isMobile = window.innerWidth < 768;
+                if (!this.isMobile) this.sidebarOpen = true;
+            })
+        }
+    }"
+    class="bg-gray-100 flex">
+    
+    <!-- Sidebar Overlay -->
+    <div 
+        x-show="sidebarOpen && isMobile" 
+        @click="sidebarOpen = false"
+        class="fixed inset-0 bg-gray-600 bg-opacity-75 z-20 transition-opacity md:hidden">
+    </div>
+
+    <!-- Sidebar -->
+    <aside 
+        :class="{'translate-x-0': sidebarOpen, '-translate-x-full hidden': !sidebarOpen}"
+        class="fixed top-0 left-0 z-30 w-64 h-full bg-white transform transition-transform duration-200 ease-in-out md:translate-x-0 md:static md:h-screen">
+        
+        <!-- Logo -->
+        <div class="flex items-center justify-between h-16 px-4 border-b">
+            <div class="flex items-center">
+                {% if site_settings.logo %}
+                    <img class="h-8 w-auto" src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}">
+                {% else %}
+                    <span class="text-xl font-bold text-indigo-600">{{ site_settings.site_name }}</span>
+                {% endif %}
+            </div>
+            <button @click="sidebarOpen = false" class="md:hidden">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar Content -->
+        <div class="overflow-y-auto h-full">
+            {% include "components/sidebar.html" %}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-h-screen"
+         :class="{'pl-0': sidebarOpen}">
+        
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex items-center justify-between h-16 px-4">
+                <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 hover:text-gray-600">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <!-- User Menu -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+                        <span>{{ user.get_full_name|default:user.email }}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    
+                    <div x-show="open" 
+                         @click.away="open = false"
+                         class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+                        <a href="{% url 'profile_detail' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                        <a href="{% url 'account_change_password' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change Password</a>
+                        <form method="post" action="{% url 'account_logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                Sign Out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4">
+            {% if messages %}
+                {% include "components/alerts.html" %}
+            {% endif %}
+            
+            {% block dashboard_content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<footer class="bg-white border-t">
+    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Brand -->
+            <div class="space-y-4">
+                {% if site_settings.logo %}
+                    <img class="h-8" src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}">
+                {% else %}
+                    <span class="text-xl font-bold text-indigo-600">{{ site_settings.site_name }}</span>
+                {% endif %}
+                <p class="text-gray-500 text-sm">{{ site_settings.site_description }}</p>
+            </div>
+
+            <!-- Contact -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Contact</h3>
+                <ul class="space-y-3">
+                    {% if site_settings.email %}
+                        <li>
+                            <a href="mailto:{{ site_settings.email }}" class="text-gray-500 hover:text-gray-900 flex items-center">
+                                <i class="fas fa-envelope w-5 h-5 mr-2"></i>
+                                {{ site_settings.email }}
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if site_settings.phone %}
+                        <li>
+                            <a href="tel:{{ site_settings.phone }}" class="text-gray-500 hover:text-gray-900 flex items-center">
+                                <i class="fas fa-phone w-5 h-5 mr-2"></i>
+                                {{ site_settings.phone }}
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if site_settings.address %}
+                        <li class="flex items-center text-gray-500">
+                            <i class="fas fa-map-marker-alt w-5 h-5 mr-2"></i>
+                            {{ site_settings.address }}
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <!-- Social Links -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Follow Us</h3>
+                <div class="flex space-x-4">
+                    {% if site_settings.facebook %}
+                        <a href="{{ site_settings.facebook }}" class="text-gray-500 hover:text-gray-900">
+                            <i class="fab fa-facebook fa-lg"></i>
+                        </a>
+                    {% endif %}
+                    {% if site_settings.twitter %}
+                        <a href="{{ site_settings.twitter }}" class="text-gray-500 hover:text-gray-900">
+                            <i class="fab fa-twitter fa-lg"></i>
+                        </a>
+                    {% endif %}
+                    {% if site_settings.instagram %}
+                        <a href="{{ site_settings.instagram }}" class="text-gray-500 hover:text-gray-900">
+                            <i class="fab fa-instagram fa-lg"></i>
+                        </a>
+                    {% endif %}
+                    {% if site_settings.linkedin %}
+                        <a href="{{ site_settings.linkedin }}" class="text-gray-500 hover:text-gray-900">
+                            <i class="fab fa-linkedin fa-lg"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Copyright -->
+        <div class="mt-8 pt-8 border-t">
+            <p class="text-center text-gray-400 text-sm">
+                {{ site_settings.copyright_text|default:'© 2024 All rights reserved.' }}
+            </p>
+        </div>
+    </div>
+</footer>
