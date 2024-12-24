@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex space-x-8">
+                    <a href="{% url 'event_list' %}" class="inline-flex items-center px-1 pt-1 text-gray-900">
+                        All Events
+                    </a>
+                    <a href="{% url 'my_tickets' %}" class="inline-flex items-center px-1 pt-1 text-gray-500 hover:text-gray-900">
+                        My Tickets
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'create_event' %}" class="inline-flex items-center px-1 pt-1 text-gray-500 hover:text-gray-900">
+                        Create Event
+                    </a>
+                    <a href="{% url 'organizer_dashboard' %}" class="inline-flex items-center px-1 pt-1 text-gray-500 hover:text-gray-900">
+                        Dashboard
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'manage_events' %}" class="inline-flex items-center px-1 pt-1 text-gray-500 hover:text-gray-900">Manage Events</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% if messages %}
+        <div class="mb-8">
+            {% for message in messages %}
+            <div class="rounded-md p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block events_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

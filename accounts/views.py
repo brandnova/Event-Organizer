@@ -1,84 +1,71 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, DetailView, UpdateView
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.contrib.auth import logout
 from django.contrib import messages
-from allauth.account.views import LoginView, SignupView, LogoutView,PasswordResetView, PasswordChangeView, EmailVerificationSentView, ConfirmEmailView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetFromKeyView, PasswordResetFromKeyDoneView
-from .forms import CustomLoginForm, CustomSignupForm, CustomResetPasswordForm, ProfileUpdateForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetConfirmView
+from django.urls import reverse_lazy
+from django.core.cache import cache
+from django.utils import timezone
+from datetime import timedelta
+import logging
+from .forms import (
+    UserRegisterForm, UserUpdateForm, ProfileUpdateForm,
+    CustomAuthenticationForm, CustomPasswordChangeForm,
+    CustomPasswordResetForm, CustomSetPasswordForm
+)
 
-class DashboardView(LoginRequiredMixin, TemplateView):
-    template_name = 'accounts/dashboard.html'
+def register(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Profile is now automatically created via signals
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}! You can now log in.')
+            return redirect('login')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'accounts/register.html', {'form': form})
 
-class ProfileDetailView(LoginRequiredMixin, DetailView):
-    template_name = 'accounts/profile.html'
-    context_object_name = 'user'
-    
-    def get_object(self):
-        return self.request.user
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add any additional context data you need
-        return context
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, 'Your account has been updated!')
+            return redirect('profile')
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=request.user.profile)
 
-class ProfileUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = 'accounts/profile_edit.html'
-    form_class = ProfileUpdateForm
-    success_url = reverse_lazy('dashboard')
-    
-    def get_object(self):
-        return self.request.user
-    
-class AccountActionsView(LoginRequiredMixin, TemplateView):
-    template_name = 'accounts/account_actions.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    context = {
+        'u_form': u_form,
+        'p_form': p_form
+    }
+    return render(request, 'accounts/profile.html', context)
 
 class CustomLoginView(LoginView):
+    form_class = CustomAuthenticationForm
     template_name = 'accounts/login.html'
-    form_class = CustomLoginForm
-    success_url = reverse_lazy('index')
-
-class CustomSignupView(SignupView):
-    template_name = 'accounts/signup.html'
-    form_class = CustomSignupForm
-    success_url = reverse_lazy('account_login')
-
-class CustomLogoutView(LogoutView):
-    template_name = 'accounts/logout.html'
-
-class CustomEmailVerificationSentView(EmailVerificationSentView):
-    template_name = 'accounts/verification_sent.html'
-
-class CustomConfirmEmailView(ConfirmEmailView):
-    template_name = 'accounts/email_confirm.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('index')
 
 class CustomPasswordChangeView(PasswordChangeView):
+    form_class = CustomPasswordChangeForm
     template_name = 'accounts/password_change.html'
-    success_url = reverse_lazy('dashboard')
+    success_url = reverse_lazy('password_change_done')
 
 class CustomPasswordResetView(PasswordResetView):
+    form_class = CustomPasswordResetForm
     template_name = 'accounts/password_reset.html'
-    form_class = CustomResetPasswordForm
+    email_template_name = 'accounts/password_reset_email.html'
+    success_url = reverse_lazy('password_reset_done')
 
-class CustomPasswordResetDoneView(PasswordResetDoneView):
-    template_name = 'accounts/password_reset_done.html'
-
-class CustomPasswordResetFromKeyView(PasswordResetFromKeyView):
-    template_name = 'accounts/password_reset_from_key.html'
-
-class CustomPasswordResetFromKeyDoneView(PasswordResetFromKeyDoneView):
-    template_name = 'accounts/password_reset_from_key_done.html'
-
-class AccountDeleteView(LoginRequiredMixin, TemplateView):
-    template_name = 'accounts/account_delete.html'
-
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        logout(request)
-        user.delete()
-        messages.success(request, 'Your account has been successfully deleted.')
-        return redirect('index')
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    form_class = CustomSetPasswordForm
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')

@@ -1,13 +1,59 @@
-{% extends "base/base.html" %}
-
-{% block content %}
-<div class="min-h-screen flex flex-col">
-    {% include "layouts/header.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Event Master{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     
-    <main class="flex-grow">
-        {% block account_content %}{% endblock %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.css">
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <header class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{% url 'index' %}" class="text-2xl font-bold text-blue-600">EventMaster</a>
+            <nav>
+                <a href="#features" class="text-gray-600 hover:text-blue-600 px-4">Features</a>
+                <a href="#pricing" class="text-gray-600 hover:text-blue-600 px-4">Pricing</a>
+                <a href="#contact" class="text-gray-600 hover:text-blue-600 px-4">Contact</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ml-4">Profile</a>
+                    <form method="POST" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600">
+                            Logout
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ml-4">Login</a>
+                    <a href="{% url 'register' %}" class="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600">Register</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        {% comment %} {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %} {% endcomment %}
+        
+        {% block content %}
+        {% endblock %}
     </main>
     
-    {% include "layouts/footer.html" %}
-</div>
-{% endblock %}
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; {% now 'Y' %} EventMaster. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

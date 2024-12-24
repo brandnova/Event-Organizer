@@ -1,0 +1,83 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">Verify Ticket</h1>
+        </div>
+
+        <div class="p-6">
+            {% if ticket %}
+            <div class="space-y-6">
+                <div class="flex items-center justify-center">
+                    {% if ticket.is_used %}
+                    <div class="bg-red-100 text-red-800 px-6 py-4 rounded-lg text-center">
+                        <p class="font-medium">This ticket has already been used</p>
+                        <p class="text-sm mt-1">Used on: {{ ticket.used_date|date:"F j, Y g:i A" }}</p>
+                    </div>
+                    {% else %}
+                    <div class="bg-green-100 text-green-800 px-6 py-4 rounded-lg text-center">
+                        <p class="font-medium">Valid Ticket</p>
+                        <button onclick="verifyTicket('{{ ticket.ticket_id }}')" 
+                                class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            Mark as Used
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="border-t border-gray-200 pt-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Ticket Details</h2>
+                    <dl class="grid grid-cols-1 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Event</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ ticket.ticket_type.event.title }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Ticket Type</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ ticket.ticket_type.name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Ticket ID</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ ticket.ticket_id }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Purchaser</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ ticket.purchaser.get_full_name }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-6">
+                <p class="text-gray-500">Invalid or expired ticket.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function verifyTicket(ticketId) {
+    fetch(`/events/verify-ticket/${ticketId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || 'Failed to verify ticket');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while verifying the ticket');
+    });
+}
+</script>
+{% endblock %}

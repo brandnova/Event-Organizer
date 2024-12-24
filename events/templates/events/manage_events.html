@@ -1,0 +1,89 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Manage Events</h1>
+                <p class="mt-1 text-gray-500">Organize and manage your events</p>
+            </div>
+            <a href="{% url 'create_event' %}" 
+               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Create New Event
+            </a>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {% for event in events %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                {% if event.banner_image %}
+                <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" class="w-full h-48 object-cover">
+                {% endif %}
+                
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ event.title }}</h3>
+                        <span class="px-3 py-1 rounded-full text-sm font-medium 
+                            {% if event.status == 'draft' %}bg-gray-100 text-gray-800
+                            {% elif event.status == 'published' %}bg-green-100 text-green-800
+                            {% elif event.status == 'cancelled' %}bg-red-100 text-red-800
+                            {% endif %}">
+                            {{ event.get_status_display }}
+                        </span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-500">
+                            <span class="font-medium">Date:</span> {{ event.start_date|date:"F j, Y" }}
+                        </p>
+                        <p class="text-sm text-gray-500">
+                            <span class="font-medium">Tickets Sold:</span> 
+                            {{ event.tickets_sold }}/{{ event.max_attendees }}
+                        </p>
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-between space-x-3">
+                        <div class="flex space-x-2">
+                            <a href="{% url 'edit_event' event.slug %}" 
+                               class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Edit
+                            </a>
+                            <a href="{% url 'manage_tickets' event.slug %}" 
+                               class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Tickets
+                            </a>
+                        </div>
+                        
+                        <form method="POST" action="{% url 'event_status' event.slug %}" class="flex-shrink-0">
+                            {% csrf_token %}
+                            <select name="status" onchange="this.form.submit()" 
+                                    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                {% for status_value, status_label in event.STATUS_CHOICES %}
+                                <option value="{{ status_value }}" {% if event.status == status_value %}selected{% endif %}>
+                                    {{ status_label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <p class="text-gray-500">You haven't created any events yet.</p>
+                <a href="{% url 'create_event' %}" 
+                   class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Create Your First Event
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Form Card -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <!-- Header -->
+            <div class="px-8 py-6 bg-gradient-to-r from-indigo-600 to-purple-600">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Edit Event</h1>
+                        <p class="text-indigo-100 mt-2">Update your event details</p>
+                    </div>
+                    <span class="px-4 py-2 rounded-full text-sm font-medium 
+                        {% if event.status == 'draft' %}bg-gray-100 text-gray-800
+                        {% elif event.status == 'published' %}bg-green-100 text-green-800
+                        {% elif event.status == 'cancelled' %}bg-red-100 text-red-800
+                        {% endif %}">
+                        {{ event.get_status_display }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Form Content -->
+            <div class="p-8">
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Event Details Section -->
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Title Field -->
+                            <div class="col-span-2">
+                                <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Event Title
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                <p class="mt-2 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Category & Status Fields -->
+                            <div>
+                                <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Category
+                                </label>
+                                {{ form.category }}
+                            </div>
+                            <div>
+                                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Status
+                                </label>
+                                {{ form.status }}
+                            </div>
+                        </div>
+
+                        <!-- Description Field -->
+                        <div>
+                            <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Description
+                            </label>
+                            {{ form.description }}
+                        </div>
+
+                        <!-- Banner Image Field -->
+                        <div>
+                            <label for="{{ form.banner_image.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Event Banner
+                            </label>
+                            {% if event.banner_image %}
+                            <div class="mb-3">
+                                <img src="{{ event.banner_image.url }}" alt="Current banner" class="h-32 object-cover rounded-lg">
+                            </div>
+                            {% endif %}
+                            {{ form.banner_image }}
+                        </div>
+
+                        <!-- Location Fields -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="col-span-2">
+                                <label for="{{ form.venue.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Venue
+                                </label>
+                                {{ form.venue }}
+                            </div>
+                            <div class="col-span-2">
+                                <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Address
+                                </label>
+                                {{ form.address }}
+                            </div>
+                        </div>
+
+                        <!-- Date and Capacity Fields -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="{{ form.start_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Start Date & Time
+                                </label>
+                                {{ form.start_date }}
+                            </div>
+                            <div>
+                                <label for="{{ form.end_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    End Date & Time
+                                </label>
+                                {{ form.end_date }}
+                            </div>
+                            <div>
+                                <label for="{{ form.max_attendees.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Maximum Attendees
+                                </label>
+                                {{ form.max_attendees }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-6 flex justify-end space-x-3">
+                        <a href="{% url 'manage_events' %}" 
+                           class="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Cancel
+                        </a>
+                        <button type="submit" 
+                                class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

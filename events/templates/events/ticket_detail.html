@@ -1,0 +1,71 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900">Ticket Details</h1>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                    {% if ticket.is_used %}
+                        bg-gray-100 text-gray-800
+                    {% else %}
+                        bg-green-100 text-green-800
+                    {% endif %}">
+                    {{ ticket.is_used|yesno:"Used,Valid" }}
+                </span>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-6">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">Event Information</h2>
+                        <div class="mt-3 space-y-2">
+                            <p class="text-gray-900 font-medium">{{ ticket.ticket_type.event.title }}</p>
+                            <p class="text-gray-600">
+                                {{ ticket.ticket_type.event.start_date|date:"F j, Y" }} at 
+                                {{ ticket.ticket_type.event.start_date|date:"g:i A" }}
+                            </p>
+                            <p class="text-gray-600">{{ ticket.ticket_type.event.venue }}</p>
+                            <p class="text-gray-600">{{ ticket.ticket_type.event.address }}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">Ticket Information</h2>
+                        <div class="mt-3 space-y-2">
+                            <p class="text-gray-600">Type: {{ ticket.ticket_type.name }}</p>
+                            <p class="text-gray-600">Ticket ID: {{ ticket.ticket_id }}</p>
+                            <p class="text-gray-600">Purchase Date: {{ ticket.purchase_date|date:"F j, Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg">
+                    {% if ticket.qr_code %}
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <img src="{{ ticket.qr_code.url }}" alt="Ticket QR Code" class="w-48 h-48">
+                    </div>
+                    <p class="mt-4 text-sm text-gray-500 text-center">
+                        Present this QR code at the event entrance
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-center space-x-4">
+                <button onclick="window.print()" 
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Print Ticket
+                </button>
+                <a href="{% url 'event_detail' ticket.ticket_type.event.slug %}" 
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    View Event Details
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

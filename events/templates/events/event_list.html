@@ -1,0 +1,71 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<div class="space-y-8">
+    {% if featured_events %}
+    <section>
+        <h2 class="text-2xl font-bold mb-4">Featured Events</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for event in featured_events %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                {% if event.banner_image %}
+                <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" class="w-full h-48 object-cover">
+                {% endif %}
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold mb-2">{{ event.title }}</h3>
+                    <p class="text-gray-600 text-sm mb-2">{{ event.start_date|date:"F j, Y" }}</p>
+                    <p class="text-gray-500 text-sm mb-4">{{ event.venue }}</p>
+                    <a href="{% url 'event_detail' event.slug %}" 
+                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        View Details
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">All Events</h2>
+            <div class="flex space-x-2">
+                {% for category in categories %}
+                <a href="?category={{ category.slug }}" 
+                   class="px-3 py-1 rounded-full text-sm {% if request.GET.category == category.slug %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                    {{ category.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for event in events %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                {% if event.banner_image %}
+                <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" class="w-full h-48 object-cover">
+                {% endif %}
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold mb-2">{{ event.title }}</h3>
+                    <p class="text-gray-600 text-sm mb-2">{{ event.start_date|date:"F j, Y" }}</p>
+                    <p class="text-gray-500 text-sm mb-4">{{ event.venue }}</p>
+                    <div class="flex justify-between items-center">
+                        <a href="{% url 'event_detail' event.slug %}" 
+                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            View Details
+                        </a>
+                        {% if event.is_sold_out %}
+                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">Sold Out</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <p class="text-gray-500">No events found.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}
